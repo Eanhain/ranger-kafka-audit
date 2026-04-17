@@ -81,7 +81,8 @@ import org.slf4j.LoggerFactory;
 
 @Component
 public class RangerBizUtil {
-	private static final Logger logger = LoggerFactory.getLogger(RangerBizUtil.class);
+	private static final Logger logger     = LoggerFactory.getLogger(RangerBizUtil.class);
+	private static final Logger auditLogger = LoggerFactory.getLogger("org.apache.ranger.audit.admin");
 
 	@Autowired
 	RESTErrorUtil restErrorUtil;
@@ -1150,6 +1151,7 @@ public class RangerBizUtil {
 		UserSessionBase usb       = ContextUtil.getCurrentUserSession();
 		String          sessionId = usb != null && usb.getSessionId() != null ? usb.getSessionId().toString() : null;
 		Long            userId    = usb != null ? usb.getUserId() : null;
+		String          loginId   = usb != null ? usb.getLoginId() : null;
 
 		for (XXTrxLogV2 xTrxLog : trxLogList) {
 			xTrxLog.setTransactionId(trxId);
@@ -1162,6 +1164,16 @@ public class RangerBizUtil {
 			}
 
 			dao.create(xTrxLog);
+
+			auditLogger.info("action={}, objectClassType={}, objectId={}, objectName={}, parentObjectName={}, transactionId={}, user={}, changeInfo={}",
+					xTrxLog.getAction(),
+					xTrxLog.getObjectClassType(),
+					xTrxLog.getObjectId(),
+					xTrxLog.getObjectName(),
+					xTrxLog.getParentObjectName(),
+					xTrxLog.getTransactionId(),
+					loginId,
+					xTrxLog.getChangeInfo());
 		}
 	}
 

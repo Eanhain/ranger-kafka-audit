@@ -21,3 +21,5 @@ winpkg/target
 **/target
 
 CLAUDE.md
+
+.vscode
